@@ -1,12 +1,12 @@
-require('dotenv').config()
+import env from "dotenv"
+env.config()
 
-const app =require("./src/app")
-const connectDB = require("./src/config/db")
+import app from  "./src/app.js" 
+import connectDB from "./src/config/db.js"
 
 connectDB();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT,()=>{
-    console.log(`Server sunn raha hai port ${PORT}me`);
-    
+    console.log(`Sunn rahaaa haiii na tuu port ${PORT} pe`);
 })
