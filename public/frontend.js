@@ -1,9 +1,12 @@
 let email = document.getElementById('email');
 let pass = document.getElementById('pass');
+
 const login = document.getElementById('login');
 const login2 = document.getElementById('login2');
 const register = document.getElementById('register');
+
 let message = document.getElementById('message');
+
 const forgot = document.getElementById('forgot');
 
 login2.addEventListener('click',function()
