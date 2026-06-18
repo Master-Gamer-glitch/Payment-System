@@ -196,7 +196,7 @@ document.addEventListener("click", function()
 
 logoutOption.addEventListener("click", function()
 {
-    window.location.href = "../Login-Page/frontend.html";
+    window.location.href = "../Login-Page/index.html";
 });
 
 upiBtn.addEventListener('click',function()

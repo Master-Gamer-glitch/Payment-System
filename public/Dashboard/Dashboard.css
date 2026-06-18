@@ -21,6 +21,12 @@ header
     justify-content: center;
     margin: 2% 0% 0% 0%;
 }
+.brandLogo
+{
+    display: inline-flex;
+    align-items: baseline;
+    text-decoration: none;
+}
 #sadak
 {
     color: white;

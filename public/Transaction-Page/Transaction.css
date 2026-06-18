@@ -1,0 +1,240 @@
+body
+{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: linear-gradient(
+        150deg,
+        #020817,
+        #081328,
+        #020817
+    );
+    min-height: 100vh;
+    color: white;
+}
+
+#main
+{
+    padding: 25px;
+}
+
+#logo
+{
+    color: #8B5CF6;
+    margin-bottom: 5px;
+}
+
+#titleSection
+{
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#pageTitle
+{
+    color: white;
+}
+
+#filterSection
+{
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 35px;
+}
+
+#filterSection button
+{
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: #8B5CF6;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#filterSection button:hover
+{
+    transform: translateY(-3px);
+}
+
+#timeFilter
+{
+    position: relative;
+}
+
+#timeOptions
+{
+    display: none;
+    position: absolute;
+    top: 45px;
+    left: 0;
+    width: 140px;
+    background-color: #0F172A;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(139,92,246,0.3);
+}
+
+.timeOption
+{
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.timeOption:hover
+{
+    background-color: #8B5CF6;
+}
+
+#transactionContainer
+{
+    width: 80%;
+    margin: auto;
+}
+
+.transactionCard
+{
+    box-sizing: border-box;
+    background-color: #0F172A;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(139,92,246,0.15);
+}
+.isAnimatingCard
+{
+    transition: none;
+    will-change: top, left, height, box-shadow;
+}
+.transactionPlaceholder
+{
+    width: 100%;
+}
+
+.transactionCard:hover
+{
+    transform: translateY(-4px);
+    box-shadow: 0 0 20px rgba(139,92,246,0.35);
+}
+
+.basicInfo h3
+{
+    margin-top: 0;
+}
+
+.details
+{
+    display: none;
+    margin-top: 20px;
+    padding-top: 15px;
+    overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,0.15);
+}
+.activeCard .details
+{
+    display: block;
+}
+
+.closeBtn
+{
+    float: right;
+    border: none;
+    background: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.blur
+{
+    filter: blur(3px);
+    opacity: 0.4;
+}
+
+.activeCard
+{
+    border: 1px solid #8B5CF6;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+    background-color: #0F172A;
+    box-shadow: 0 0 30px rgba(139,92,246,0.6);
+}
+.activeCard:hover
+{
+    transform: none;
+}
+
+@media(max-width: 768px)
+{
+    #transactionContainer
+    {
+        width: 95%;
+    }
+
+    .activeCard
+    {
+        max-width: 90%;
+    }
+}
+#overlay
+{
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    z-index: 999;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+#overlay.visible
+{
+    visibility: visible;
+    opacity: 1;
+}
+.activeFilter
+{
+    background-color: white !important;
+    color: #8B5CF6 !important;
+}
+.brandLogo
+{
+    display: inline-flex;
+    align-items: baseline;
+    text-decoration: none;
+}
+#sadak
+{
+    color: white;
+    font-size: 250%;
+    margin: 2% 0.3% 0% 2%;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1f2937;
+    margin: 0;
+}
+#pe
+{
+    color: white;
+    font-size: 150%;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #7c3aed;
+}
