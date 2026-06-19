@@ -8,7 +8,14 @@ const timeBtn = document.getElementById("timeBtn");
 const timeOptions = document.getElementById("timeOptions");
 
 const overlay = document.getElementById("overlay");
+
+// ===== BACKEND ENDPOINT (fill this in) =====
+const GET_TRANSACTIONS_HISTORY_ENDPOINT = "";
+// ===============================================
+
 const pageTransactions = getAllTransactions();
+
+// fetch(GET_TRANSACTIONS_HISTORY_ENDPOINT);
 
 displayTransactions(pageTransactions);
 
@@ -339,27 +346,9 @@ receivedBtn.addEventListener("click", function()
     displayTransactions(receivedTransactions);
 });
 
-/*
-Future Backend Logic
-
-fetch("/api/transactions/history")
-.then(...)
+fetch(GET_TRANSACTIONS_HISTORY_ENDPOINT)
+.then(response => response.json())
 .then(data =>
 {
     displayTransactions(data);
 });
-
-*/
-
-/*
-Future Time Filter Logic
-
-Today
-Yesterday
-This Month
-This Year
-
-Use transaction.createdAt from backend
-and compare dates before displaying cards.
-
-*/

@@ -32,8 +32,18 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0
 });
 
+// ===== BACKEND ENDPOINTS (fill these in) =====
+const GET_BALANCE_ENDPOINT = "";
+const UPDATE_BALANCE_ENDPOINT = "";
+const GET_TRANSACTIONS_ENDPOINT = "";
+const CREATE_TRANSACTION_ENDPOINT = "";
+const LOGOUT_ENDPOINT = "";
+// ===============================================
+
 function getStoredBalance()
 {
+    // fetch(GET_BALANCE_ENDPOINT);
+
     const savedBalanceValue = localStorage.getItem(balanceStorageKey);
     const savedBalance = Number(savedBalanceValue);
 
@@ -49,6 +59,8 @@ function getStoredBalance()
 function saveBalance()
 {
     localStorage.setItem(balanceStorageKey, String(accountBalance));
+
+    fetch(UPDATE_BALANCE_ENDPOINT, { method: "POST", body: JSON.stringify({ balance: accountBalance }) });
 }
 
 function renderBalance()
@@ -137,6 +149,8 @@ function renderRecentTransactions()
 
 function refreshDashboardTransactions()
 {
+    // fetch(GET_TRANSACTIONS_ENDPOINT);
+
     dashboardTransactions = getAllTransactions();
     renderRecentTransactions();
     renderMonthlySummary();
@@ -196,6 +210,8 @@ document.addEventListener("click", function()
 
 logoutOption.addEventListener("click", function()
 {
+    fetch(LOGOUT_ENDPOINT, { method: "POST" });
+
     window.location.href = "../Login-Page/index.html";
 });
 
@@ -310,6 +326,9 @@ sendBtn.addEventListener('click',function()
         };
 
         saveNewTransaction(newTransaction);
+
+        fetch(CREATE_TRANSACTION_ENDPOINT, { method: "POST", body: JSON.stringify(newTransaction) });
+
         accountBalance = isTopup
             ? accountBalance + amount
             : accountBalance - amount;

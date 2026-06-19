@@ -11,6 +11,11 @@ const forgot = document.getElementById('forgot');
 
 let isLoginMode = true;
 
+
+const LOGIN_ENDPOINT = "";
+const REGISTER_ENDPOINT = "";
+
+
 login2.addEventListener('click',function()
 {
     const emailValue = email.value.trim().toLowerCase();
@@ -31,12 +36,17 @@ login2.addEventListener('click',function()
         {
             message.textContent = "Logging in...";
             message.style.color = 'white';
+
+            fetch(LOGIN_ENDPOINT, { method: "POST", body: JSON.stringify({ email: emailValue, password: pass.value }) });
+
             window.location.href = "../Dashboard/Dashboard.html";
         }
         else
         {
             message.textContent = "Registration successful";
             message.style.color = 'white';
+
+            fetch(REGISTER_ENDPOINT, { method: "POST", body: JSON.stringify({ email: emailValue, password: pass.value }) });
         }
     }
 })

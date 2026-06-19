@@ -87,6 +87,11 @@ const transactions = [
 
 const transactionStorageKey = "sadakPeNewTransactions";
 
+// ===== BACKEND ENDPOINTS (fill these in) =====
+const GET_TRANSACTIONS_ENDPOINT = "";
+const CREATE_TRANSACTION_ENDPOINT = "";
+// ===============================================
+
 function getSavedTransactions()
 {
     try
@@ -111,10 +116,14 @@ function saveNewTransaction(transaction)
         transactionStorageKey,
         JSON.stringify(savedTransactions)
     );
+
+    fetch(CREATE_TRANSACTION_ENDPOINT, { method: "POST", body: JSON.stringify(transaction) });
 }
 
 function getAllTransactions()
 {
+    // fetch(GET_TRANSACTIONS_ENDPOINT);
+
     return [...getSavedTransactions(), ...transactions].sort(function(a, b)
     {
         return new Date(b.createdAt) - new Date(a.createdAt);
