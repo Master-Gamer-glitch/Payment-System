@@ -187,7 +187,7 @@ export const topUp = async (req, res) => {
     })
   } catch (error) {
 
-    console.log("Topup Error:", error.message)
+    console.log("Topup Error: ", error.message)
     res.status(500).json({ message: "Topup failed hahahahahaHAHAHAHAHAHAHA", error: error.message })
   }
 }
