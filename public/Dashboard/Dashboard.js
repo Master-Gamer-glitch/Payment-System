@@ -32,17 +32,17 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0
 });
 
-// ===== BACKEND ENDPOINTS (fill these in) =====
-const GET_BALANCE_ENDPOINT = "";
-const UPDATE_BALANCE_ENDPOINT = "";
-const GET_TRANSACTIONS_ENDPOINT = "";
-const CREATE_TRANSACTION_ENDPOINT = "";
-const LOGOUT_ENDPOINT = "";
+// ===== BACKEND ENDPOINTS =====
+const GET_BALANCE_ENDPOINT = "/api/auth/me";
+const UPDATE_BALANCE_ENDPOINT = "/api/transactions/topup";
+const GET_TRANSACTIONS_ENDPOINT = "/api/transactions/history";
+const CREATE_TRANSACTION_ENDPOINT = "/api/transactions/send";
+const LOGOUT_ENDPOINT = "/api/auth/logout";
 // ===============================================
 
 function getStoredBalance()
 {
-    // fetch(GET_BALANCE_ENDPOINT);
+    fetch(GET_BALANCE_ENDPOINT);
 
     const savedBalanceValue = localStorage.getItem(balanceStorageKey);
     const savedBalance = Number(savedBalanceValue);
@@ -149,7 +149,7 @@ function renderRecentTransactions()
 
 function refreshDashboardTransactions()
 {
-    // fetch(GET_TRANSACTIONS_ENDPOINT);
+    fetch(GET_TRANSACTIONS_ENDPOINT);
 
     dashboardTransactions = getAllTransactions();
     renderRecentTransactions();

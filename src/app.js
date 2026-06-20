@@ -9,6 +9,7 @@ import notificationRouter from "./routes/notification.routes.js"
 app.use(express.json()); // ye ek middle ware jo bhi body bahar se aayingi json me usko javascript me convert karenga
 
 app.use(cookieParser()); // ye bhi middle ware hai jo cookies se aati hai usko parse karta hai js me.....
+app.use(express.static("public")) // taaki frontend and backend ek hi url pe chale;
 
 app.use("/api/auth",authRouter);
 // app.use("/api/accounts",accountRouter)

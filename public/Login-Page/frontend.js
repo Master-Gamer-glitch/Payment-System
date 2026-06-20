@@ -11,9 +11,8 @@ const forgot = document.getElementById('forgot');
 
 let isLoginMode = true;
 
-
-const LOGIN_ENDPOINT = "";
-const REGISTER_ENDPOINT = "";
+const LOGIN_ENDPOINT = "/api/auth/login";
+const REGISTER_ENDPOINT = "/api/auth/register";
 
 
 login2.addEventListener('click',function()
