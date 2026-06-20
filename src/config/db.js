@@ -8,4 +8,3 @@ export default function connectDb(){
         process.exit(1)
     })
 }
-

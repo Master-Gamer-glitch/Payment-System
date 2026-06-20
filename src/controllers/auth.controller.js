@@ -105,7 +105,7 @@ export const logout = async (req, res) => {
   } 
   catch (err) {
     console.log("Logout Error:", err)
-    res.status(500).send({ message: "Server error during logout", error: err.message })
+    res.status(500).send({ message: "We just coudnt let such a cutie go :(\n\n", error: err.message })
   }
 }
 
@@ -114,10 +114,10 @@ export const getMe = async (req, res) => {
   try {
 
     // middleware ne alr token verify krke req me daaldia tha userinfo;
-    return res.status(200).body({ user: { id: req.user._id, name: req.user.name, email: req.user.email, balance: req.user.balance }})
+    return res.status(200).send({ user: { id: req.user._id, name: req.user.name, email: req.user.email, balance: req.user.balance }})
 
   } catch (err) {
     console.log("getMe Error: ", err)
-    res.status(500).send({ message: "smth went wrong", error: err.message })
+    res.status(500).send({ message: "charishma so good we fell..\n\n", error: err.message })
   }
 }
