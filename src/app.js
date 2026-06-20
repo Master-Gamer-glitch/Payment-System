@@ -17,7 +17,7 @@ app.use("/api/transactions",transactionRouter);
 app.use("/api/notifications",notificationRouter);
 
 app.get("/", (req, res) => {
-  res.redirect("/Login-Page/")
+  res.redirect("/Login-Page/index.html")
 })
 
 export default app
