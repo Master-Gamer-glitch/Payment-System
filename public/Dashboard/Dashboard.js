@@ -51,6 +51,7 @@ async function fetchUserData() {
         balanceAmount.textContent = currencyFormatter.format(user.balance);
     } catch (error) {
         console.error("Error fetching user data:", error);
+        window.location.href = "../Login-Page/index.html";
     }
 }
 
@@ -184,6 +185,13 @@ function showToast(text, type)
     {
         successToast.classList.remove("show");
     }, 2500);
+}
+
+function showSuccessToast(text) {
+    showToast(text, "success");
+}
+function showErrorToast(text) {
+    showToast(text, "error");
 }
 
 // Global functions for toast alert popups

@@ -37,21 +37,61 @@ login2.addEventListener('click',function()
             message.textContent = "Logging in...";
             message.style.color = 'white';
 
-            fetch(LOGIN_ENDPOINT, { method: "POST", body: JSON.stringify({ email: emailValue, password: pass.value }) });
-
-            window.location.href = "../Dashboard/Dashboard.html";
+            fetch(LOGIN_ENDPOINT, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: emailValue, password: pass.value }) 
+            })
+            .then(res => {
+                if(res.ok) {
+                    window.location.href = "../Dashboard/Dashboard.html";
+                } else {
+                    res.json().then(data => {
+                        message.textContent = data.message || "Login failed";
+                        message.style.color = 'red';
+                    }).catch(() => {
+                        message.textContent = "Login failed";
+                        message.style.color = 'red';
+                    });
+                }
+            })
+            .catch(err => {
+                message.textContent = "Network error";
+                message.style.color = 'red';
+            });
         }
         else
         {
-            message.textContent = "Registration successful";
-            message.style.color = 'green';
+            message.textContent = "Registering...";
+            message.style.color = 'white';
 
-            fetch(REGISTER_ENDPOINT, { method: "POST", body: JSON.stringify({ email: emailValue, password: pass.value }) });
-
-            setTimeout(function()
-            {
-                window.location.href = "../Dashboard/Dashboard.html";
-            }, 800);
+            fetch(REGISTER_ENDPOINT, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: emailValue.split('@')[0], email: emailValue, password: pass.value }) 
+            })
+            .then(res => {
+                if(res.ok) {
+                    message.textContent = "Registration successful";
+                    message.style.color = 'green';
+                    setTimeout(function()
+                    {
+                        window.location.href = "../Dashboard/Dashboard.html";
+                    }, 800);
+                } else {
+                    res.json().then(data => {
+                        message.textContent = data.message || "Registration failed";
+                        message.style.color = 'red';
+                    }).catch(() => {
+                        message.textContent = "Registration failed";
+                        message.style.color = 'red';
+                    });
+                }
+            })
+            .catch(err => {
+                message.textContent = "Network error";
+                message.style.color = 'red';
+            });
         }
     }
 })
