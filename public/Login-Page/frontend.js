@@ -14,9 +14,6 @@ let isLoginMode = true;
 const LOGIN_ENDPOINT = "/api/auth/login";
 const REGISTER_ENDPOINT = "/api/auth/register";
 
-forgot.addEventListener("click", function(){
-    alert("tch tch tch... ham kuch ni kr skte lol naya acc banao :)");
-})
 
 login2.addEventListener('click',function()
 {

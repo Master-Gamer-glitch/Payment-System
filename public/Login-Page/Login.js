@@ -121,3 +121,8 @@ login.addEventListener('click',function()
     forgot.style.display = "block";
     message.textContent = "";
 })
+
+forgot.addEventListener("click", function(e){
+    e.preventDefault();
+    alert("tch tch tch... ham kuch ni kr skte lol naya acc banao :)");
+})
