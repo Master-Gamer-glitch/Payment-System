@@ -9,15 +9,38 @@ const timeOptions = document.getElementById("timeOptions");
 
 const overlay = document.getElementById("overlay");
 
-// ===== BACKEND ENDPOINT (fill this in) =====
-const GET_TRANSACTIONS_HISTORY_ENDPOINT = "";
+// ===== BACKEND ENDPOINT =====
+const GET_TRANSACTIONS_HISTORY_ENDPOINT = "/api/transactions/history";
 // ===============================================
 
-const pageTransactions = getAllTransactions();
+let pageTransactions = [];
 
-// fetch(GET_TRANSACTIONS_HISTORY_ENDPOINT);
+// Fetch from backend
+async function initTransactions() {
+    try {
+        const response = await fetch(GET_TRANSACTIONS_HISTORY_ENDPOINT);
+        if (response.ok) {
+            const data = await response.json();
+            pageTransactions = data.history || [];
+            displayTransactions(pageTransactions);
+            
+            // Check if redirect query param exists and auto-open it
+            const selectedTransactionId = new URLSearchParams(window.location.search).get("transaction");
+            if (selectedTransactionId) {
+                const selectedCard = Array.from(
+                    document.querySelectorAll(".transactionCard")
+                ).find(card => card.dataset.transactionId === selectedTransactionId);
 
-displayTransactions(pageTransactions);
+                if (selectedCard) {
+                    const selectedDetails = selectedCard.querySelector(".details");
+                    openCard(selectedCard, selectedDetails);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error loading transactions:", error);
+    }
+}
 
 function displayTransactions(data)
 {
@@ -27,7 +50,7 @@ function displayTransactions(data)
     {
         const card = document.createElement("div");
         card.classList.add("transactionCard");
-        card.dataset.transactionId = transaction.id;
+        card.dataset.transactionId = transaction._id;
 
         let icon = "";
         let heading = "";
@@ -43,6 +66,21 @@ function displayTransactions(data)
             heading = "Received";
         }
 
+        const dateObj = new Date(transaction.createdAt);
+        const formattedDate = new Intl.DateTimeFormat("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        }).format(dateObj);
+        
+        const formattedTime = new Intl.DateTimeFormat("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }).format(dateObj);
+
+        const isTopup = transaction.type === "credit" && transaction.note === "Account Top-up";
+
         card.innerHTML =
         `
         <div class="basicInfo">
@@ -51,9 +89,9 @@ function displayTransactions(data)
                 ${icon} ${heading} ₹${transaction.amount}
             </h3>
 
-            <p>${escapeHtml(transaction.note)}</p>
+            <p>${escapeHtml(transaction.note || "No note")}</p>
 
-            <p>${escapeHtml(transaction.date)}</p>
+            <p>${escapeHtml(formattedDate)}</p>
 
         </div>
 
@@ -63,19 +101,19 @@ function displayTransactions(data)
                 ✖
             </button>
 
-            <p><strong>Sender :</strong> ${escapeHtml(transaction.sender)}</p>
+            <p><strong>Sender ID :</strong> ${escapeHtml(isTopup ? "Self" : transaction.sender)}</p>
 
-            <p><strong>Receiver :</strong> ${escapeHtml(transaction.receiver)}</p>
+            <p><strong>Receiver ID :</strong> ${escapeHtml(isTopup ? "Self" : transaction.receiver)}</p>
 
             <p><strong>Type :</strong> ${escapeHtml(transaction.type)}</p>
 
             <p><strong>Amount :</strong> ₹${transaction.amount}</p>
 
-            <p><strong>Note :</strong> ${escapeHtml(transaction.note)}</p>
+            <p><strong>Note :</strong> ${escapeHtml(transaction.note || "No note")}</p>
 
-            <p><strong>Date :</strong> ${escapeHtml(transaction.date)}</p>
+            <p><strong>Date :</strong> ${escapeHtml(formattedDate)}</p>
 
-            <p><strong>Time :</strong> ${escapeHtml(transaction.time)}</p>
+            <p><strong>Time :</strong> ${escapeHtml(formattedTime)}</p>
 
         </div>
         `;
@@ -102,22 +140,6 @@ function displayTransactions(data)
             closeCard(card, details);
         });
     });
-}
-
-const selectedTransactionId =
-    new URLSearchParams(window.location.search).get("transaction");
-
-if(selectedTransactionId)
-{
-    const selectedCard = Array.from(
-        document.querySelectorAll(".transactionCard")
-    ).find(card => card.dataset.transactionId === selectedTransactionId);
-
-    if(selectedCard)
-    {
-        const selectedDetails = selectedCard.querySelector(".details");
-        openCard(selectedCard, selectedDetails);
-    }
 }
 
 async function openCard(card, details)
@@ -346,9 +368,15 @@ receivedBtn.addEventListener("click", function()
     displayTransactions(receivedTransactions);
 });
 
-fetch(GET_TRANSACTIONS_HISTORY_ENDPOINT)
-.then(response => response.json())
-.then(data =>
+function escapeHtml(value)
 {
-    displayTransactions(data);
-});
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Initialize on page load
+initTransactions();

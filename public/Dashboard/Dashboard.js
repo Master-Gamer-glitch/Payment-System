@@ -2,13 +2,10 @@ let accDetail = document.getElementById("accDetail");
 let money = document.getElementById("amtInput");
 const sendBtn = document.getElementById("send");
 const upiBtn = document.getElementById("upi");
-const accBtn = document.getElementById("accTrans");
 const topupBtn = document.getElementById("topup");
-const billsBtn = document.getElementById("bills");
 const inputs = document.getElementById("inputs");
 const accDetailBreak = document.getElementById("accDetailBreak");
 let message = document.getElementById("message");
-const billsOption = document.getElementById("billsOptions");
 const viewAllBtn = document.getElementById("veiw");
 const recentBox = document.getElementById("rcntBox");
 const amountSent = document.getElementById("amtSent");
@@ -20,11 +17,9 @@ const profileMenu = document.getElementById("profileMenu");
 const logoutOption = document.getElementById("logoutOption");
 const balanceAmount = document.getElementById("amt");
 
-let selectedPaymentMode = "upi";
+let selectedPaymentMode = "send";
 let toastTimer;
-let dashboardTransactions = getAllTransactions();
-const balanceStorageKey = "sadakPeAccountBalance";
-let accountBalance = getStoredBalance();
+let dashboardTransactions = [];
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -40,32 +35,38 @@ const CREATE_TRANSACTION_ENDPOINT = "/api/transactions/send";
 const LOGOUT_ENDPOINT = "/api/auth/logout";
 // ===============================================
 
-function getStoredBalance()
-{
-    fetch(GET_BALANCE_ENDPOINT);
+// Fetch user data (balance and name) on startup
+async function fetchUserData() {
+    try {
+        const response = await fetch(GET_BALANCE_ENDPOINT);
+        if (!response.ok) {
+            // If not logged in, redirect to login page
+            window.location.href = "../Login-Page/index.html";
+            return;
+        }
+        const data = await response.json();
+        const user = data.user;
 
-    const savedBalanceValue = localStorage.getItem(balanceStorageKey);
-    const savedBalance = Number(savedBalanceValue);
-
-    if(savedBalanceValue !== null && Number.isFinite(savedBalance))
-    {
-        return savedBalance;
+        document.getElementById("username").textContent = user.name;
+        balanceAmount.textContent = currencyFormatter.format(user.balance);
+    } catch (error) {
+        console.error("Error fetching user data:", error);
     }
-
-    localStorage.setItem(balanceStorageKey, "1000");
-    return 1000;
 }
 
-function saveBalance()
-{
-    localStorage.setItem(balanceStorageKey, String(accountBalance));
-
-    fetch(UPDATE_BALANCE_ENDPOINT, { method: "POST", body: JSON.stringify({ balance: accountBalance }) });
-}
-
-function renderBalance()
-{
-    balanceAmount.textContent = currencyFormatter.format(accountBalance);
+// Fetch transaction history from backend
+async function fetchTransactions() {
+    try {
+        const response = await fetch(GET_TRANSACTIONS_ENDPOINT);
+        if (response.ok) {
+            const data = await response.json();
+            dashboardTransactions = data.history || [];
+            renderRecentTransactions();
+            renderMonthlySummary();
+        }
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+    }
 }
 
 function renderMonthlySummary()
@@ -81,7 +82,8 @@ function renderMonthlySummary()
 
     const monthlySummary = currentMonthTransactions.reduce(function(summary, transaction)
     {
-        if(transaction.category === "topup")
+        const isTopup = transaction.type === "credit" && transaction.note === "Account Top-up";
+        if(isTopup)
         {
             summary.topups += transaction.amount;
         }
@@ -112,7 +114,7 @@ function renderRecentTransactions()
 
     dashboardTransactions.slice(0, 4).forEach(function(transaction)
     {
-        const isTopup = transaction.category === "topup";
+        const isTopup = transaction.type === "credit" && transaction.note === "Account Top-up";
         const isCredit = transaction.type === "credit";
         const amountClass = isTopup
             ? "topupAmount"
@@ -120,24 +122,35 @@ function renderRecentTransactions()
                 ? "creditAmount"
                 : "debitAmount";
         const amountSign = isCredit ? "+" : "-";
-        const title = isTopup
-            ? "Wallet Top-up"
-            : isCredit
-                ? transaction.sender
-                : transaction.receiver;
-        const subtitle = isTopup
-            ? "Added to wallet"
-            : isCredit
-                ? "Money credited"
-                : transaction.note;
+        
+        let title = "";
+        let subtitle = "";
+
+        if (isTopup) {
+            title = "Wallet Top-up";
+            subtitle = "Added to wallet";
+        } else if (isCredit) {
+            title = "Money Received";
+            subtitle = transaction.note || "Received from user";
+        } else {
+            title = "Money Sent";
+            subtitle = transaction.note || "Sent to user";
+        }
+
+        const dateObj = new Date(transaction.createdAt);
+        const formattedDate = new Intl.DateTimeFormat("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        }).format(dateObj);
 
         recentBox.innerHTML +=
         `
         <a class="recentTransaction"
-            href="../Transaction-Page/Transaction.html?transaction=${encodeURIComponent(transaction.id)}">
+            href="../Transaction-Page/Transaction.html?transaction=${encodeURIComponent(transaction._id)}">
             <div class="transactionInfo">
                 <strong>${escapeHtml(title)}</strong>
-                <span>${escapeHtml(subtitle)} · ${escapeHtml(transaction.date)}</span>
+                <span>${escapeHtml(subtitle)} · ${escapeHtml(formattedDate)}</span>
             </div>
             <span class="${amountClass}">
                 ${amountSign} ${currencyFormatter.format(transaction.amount)}
@@ -147,18 +160,9 @@ function renderRecentTransactions()
     });
 }
 
-function refreshDashboardTransactions()
-{
-    fetch(GET_TRANSACTIONS_ENDPOINT);
-
-    dashboardTransactions = getAllTransactions();
-    renderRecentTransactions();
-    renderMonthlySummary();
-}
-
 function setSelectedButton(activeButton)
 {
-    [upiBtn, accBtn, topupBtn, billsBtn].forEach(function(button)
+    [upiBtn, topupBtn].forEach(function(button)
     {
         button.classList.remove("selectedButton");
         button.classList.add("unselectedButton");
@@ -182,15 +186,9 @@ function showToast(text, type)
     }, 2500);
 }
 
-function showSuccessToast(text)
-{
-    showToast(text, "success");
-}
-
-function showErrorToast(text)
-{
-    showToast(text, "error");
-}
+// Global functions for toast alert popups
+window.showSuccessToast = showSuccessToast;
+window.showErrorToast = showErrorToast;
 
 profileBtn.addEventListener("click", function(e)
 {
@@ -208,44 +206,30 @@ document.addEventListener("click", function()
     profileMenu.classList.remove("show");
 });
 
-logoutOption.addEventListener("click", function()
+logoutOption.addEventListener("click", async function()
 {
-    fetch(LOGOUT_ENDPOINT, { method: "POST" });
-
-    window.location.href = "../Login-Page/index.html";
+    try {
+        await fetch(LOGOUT_ENDPOINT, { method: "POST" });
+        window.location.href = "../Login-Page/index.html";
+    } catch (e) {
+        window.location.href = "../Login-Page/index.html";
+    }
 });
 
 upiBtn.addEventListener('click',function()
 {
-    selectedPaymentMode = "upi";
+    selectedPaymentMode = "send";
     setSelectedButton(upiBtn);
     inputs.style.display = "block";
     accDetail.style.display = "inline-block";
     accDetailBreak.style.display = "block";
-    billsOption.style.display = "none";
     sendBtn.style.display = "block";
     sendBtn.textContent = "Send";
-    accDetail.placeholder = "Enter UPI ID";
+    accDetail.placeholder = "Enter Receiver Email";
     money.placeholder = "Enter the amount to send";
-
     message.textContent = "";
 })
-accBtn.addEventListener('click',function()
-{
-    selectedPaymentMode = "account";
-    setSelectedButton(accBtn);
-    inputs.style.display = "block";
-    accDetail.style.display = "inline-block";
-    accDetailBreak.style.display = "block";
-    billsOption.style.display = "none";
-    sendBtn.style.display = "block";
-    sendBtn.textContent = "Send";
-    accDetail.placeholder = "Enter Account Number";
-    money.placeholder = "Enter the amount to send";
 
-    message.textContent = "";
-
-})
 topupBtn.addEventListener('click',function()
 {
     selectedPaymentMode = "topup";
@@ -253,97 +237,83 @@ topupBtn.addEventListener('click',function()
     inputs.style.display = "block";
     accDetail.style.display = "none";
     accDetailBreak.style.display = "none";
-    billsOption.style.display = "none";
     sendBtn.style.display = "block";
     sendBtn.textContent = "Top-Up";
     money.placeholder = "Enter top-up amount";
-
     message.textContent = "";
 })
-billsBtn.addEventListener('click',function()
-{
-    selectedPaymentMode = "bills";
-    setSelectedButton(billsBtn);
-    inputs.style.display = "none";
-    billsOption.style.display = "block";
-    sendBtn.style.display = "none";
-    
-    billsOption.style.display = "flex";
 
-    message.textContent = "";
-
-})
-
-sendBtn.addEventListener('click',function()
+sendBtn.addEventListener('click', async function()
 {
     const amount = Number(money.value);
     const receiverDetail = accDetail.value.trim();
 
-    if(selectedPaymentMode !== "topup" && receiverDetail.length == 0)
+    if(selectedPaymentMode === "send")
     {
-        message.textContent = "Please enter valid receiver details";
-        message.style.color = "red";
+        if(receiverDetail.length == 0)
+        {
+            message.textContent = "Please enter receiver email";
+            message.style.color = "red";
+            return;
+        }
+        if(amount <= 0)
+        {
+            message.textContent = "Please Enter a valid amount.";
+            message.style.color = "red";
+            return;
+        }
+
+        try {
+            const response = await fetch(CREATE_TRANSACTION_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    receiverEmail: receiverDetail,
+                    amount: amount,
+                    note: "Money Transfer"
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showErrorToast(data.message || "Transfer failed");
+                return;
+            }
+            showSuccessToast("Money sent successfully");
+            accDetail.value = "";
+            money.value = "";
+            message.textContent = "";
+            await initDashboard();
+        } catch (error) {
+            showErrorToast("Server error during transfer");
+        }
     }
-    else if(amount <= 0)
+    else if(selectedPaymentMode === "topup")
     {
-        message.textContent = "Please Enter a valid amount.";
-        message.style.color = "red";
-    }
-    else if(selectedPaymentMode !== "topup" && amount > accountBalance)
-    {
-        message.textContent = "";
-        showErrorToast("Insufficient balance");
-    }
-    else
-    {
-        const now = new Date();
-        const date = new Intl.DateTimeFormat("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-        }).format(now);
-        const time = new Intl.DateTimeFormat("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true
-        }).format(now);
-        const isTopup = selectedPaymentMode === "topup";
-        const newTransaction = {
-            id: `${selectedPaymentMode}-${Date.now()}`,
-            sender: "Dhruv",
-            receiver: isTopup ? "Dhruv" : receiverDetail,
-            amount: amount,
-            type: isTopup ? "credit" : "debit",
-            category: isTopup ? "topup" : "payment",
-            note: isTopup
-                ? "Wallet Topup"
-                : selectedPaymentMode === "account"
-                    ? "Account Transfer"
-                    : "UPI Payment",
-            date: date,
-            time: time,
-            createdAt: now.toISOString()
-        };
+        if(amount <= 0)
+        {
+            message.textContent = "Please Enter a valid amount.";
+            message.style.color = "red";
+            return;
+        }
 
-        saveNewTransaction(newTransaction);
-
-        fetch(CREATE_TRANSACTION_ENDPOINT, { method: "POST", body: JSON.stringify(newTransaction) });
-
-        accountBalance = isTopup
-            ? accountBalance + amount
-            : accountBalance - amount;
-        saveBalance();
-        renderBalance();
-        refreshDashboardTransactions();
-
-        accDetail.value = "";
-        money.value = "";
-        message.textContent = "";
-        showSuccessToast(
-            isTopup
-                ? "Top-up successful"
-                : "Money sent successfully"
-        );
+        try {
+            const response = await fetch(UPDATE_BALANCE_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: amount })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showErrorToast(data.message || "Top-up failed");
+                return;
+            }
+            showSuccessToast("Top-up successful");
+            money.value = "";
+            message.textContent = "";
+            await initDashboard();
+        } catch (error) {
+            showErrorToast("Server error during top-up");
+        }
     }
 })
 
@@ -352,6 +322,20 @@ viewAllBtn.addEventListener('click', function()
     window.location.href = "../Transaction-Page/Transaction.html";
 })
 
-renderBalance();
-renderRecentTransactions();
-renderMonthlySummary();
+function escapeHtml(value)
+{
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function initDashboard() {
+    await fetchUserData();
+    await fetchTransactions();
+}
+
+// Initial dashboard load
+initDashboard();
